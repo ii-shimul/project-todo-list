@@ -37,14 +37,28 @@ const INITIAL_TASKS = [
 
 function App() {
   const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over) {
+      return;
+    }
+    const taskId = active.id;
+    const newStatus = over.id;
+    setTasks(() => {
+      tasks.map((task) =>
+        task.id === taskId ? { ...task, status: newStatus } : task
+      );
+    });
+  };
   return (
     <div>
       <Navbar />
-      <div className="p-4">
+      <div className="p-4 max-w-7xl mx-auto">
         <div className="flex gap-3.5">
           {COLUMNS.map((col) => (
             <Column
               key={col.id}
+              column={col}
               tasks={tasks.filter((task) => task.status === col.id)}
             />
           ))}
