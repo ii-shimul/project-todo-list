@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import useAuth from "../hooks/useAuth"
+import useAuth from "../hooks/useAuth";
 
 const routes = [
   { name: "Home", href: "#", isActive: true },
@@ -27,9 +27,8 @@ NavMenu.propTypes = {
   routes: PropTypes.array.isRequired,
 };
 
-
 const Navbar = () => {
-  const { logInGoogle } = useAuth();
+  const { logInGoogle, user, logOut } = useAuth();
   return (
     <div className="py-4 bg-white dark:bg-[#0b1727] text-zinc-900 dark:text-white relative">
       <nav className="max-w-7xl mx-auto">
@@ -39,16 +38,21 @@ const Navbar = () => {
               TaskFlow
             </a>
             <NavMenu routes={routes} />
-            <ul className="mb-2 lg:mb-0">
-              <li>
-                <button
-                  onClick={logInGoogle}
-                  className="border border-black hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black rounded-lg px-4 py-1.5"
-                >
-                  Login
-                </button>
-              </li>
-            </ul>
+            {user?.email ? (
+              <button
+                onClick={() => logOut()}
+                className="border border-black hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black rounded-lg px-4 py-1.5"
+              >
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={logInGoogle}
+                className="border border-black hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black rounded-lg px-4 py-1.5"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
       </nav>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Column from "./components/Column";
+import { DndContext } from "@dnd-kit/core";
 
 const COLUMNS = [
   { id: "TODO", title: "To Do" },
@@ -44,24 +45,25 @@ function App() {
     }
     const taskId = active.id;
     const newStatus = over.id;
-    setTasks(() => {
-      tasks.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      );
-    });
+    const newTasks = tasks.map((task) =>
+      task.id === taskId ? { ...task, status: newStatus } : task
+    );
+    setTasks(newTasks);
   };
   return (
     <div>
       <Navbar />
       <div className="p-4 max-w-7xl mx-auto">
-        <div className="flex gap-3.5">
-          {COLUMNS.map((col) => (
-            <Column
-              key={col.id}
-              column={col}
-              tasks={tasks.filter((task) => task.status === col.id)}
-            />
-          ))}
+        <div className="grid grid-cols-3 gap-3.5">
+          <DndContext onDragEnd={handleDragEnd}>
+            {COLUMNS.map((col) => (
+              <Column
+                key={col.id}
+                column={col}
+                tasks={tasks.filter((task) => task.status === col.id)}
+              />
+            ))}
+          </DndContext>
         </div>
       </div>
     </div>
