@@ -1,0 +1,28 @@
+import PropTypes from "prop-types";
+import TaskCard from "./TaskCard";
+
+const Column = ({ column, tasks }) => {
+  return (
+    <div className="flex w-80 flex-col rounded-lg bg-neutral-800 p-4">
+      <h2 className="mb-4 font-semibold text-neutral-100">{column.title}</h2>
+      <div className="flex flex-1 flex-col gap-4">
+        {tasks.map((task) => {
+          return <TaskCard key={task.id} task={task} />;
+        })}
+      </div>
+    </div>
+  );
+};
+
+Column.propTypes = {
+  column: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+  }).isRequired,
+  tasks: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+};
+
+export default Column;
