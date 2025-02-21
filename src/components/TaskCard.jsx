@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 const TaskCard = ({ task }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: task.id,
+    id: task._id,
   });
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
@@ -26,7 +26,7 @@ TaskCard.propTypes = {
   task: PropTypes.shape({
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    id: PropTypes.number.isRequired,
+    _id: PropTypes.number.isRequired,
   }).isRequired,
 };
 

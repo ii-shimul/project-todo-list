@@ -2,43 +2,31 @@ import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Column from "./components/Column";
 import { DndContext } from "@dnd-kit/core";
+import useAxios from "./hooks/useAxios";
+import { useQuery } from "@tanstack/react-query";
+import useAuth from "./hooks/useAuth";
 
 const COLUMNS = [
-  { id: "TODO", title: "To Do" },
-  { id: "IN_PROGRESS", title: "In Progress" },
-  { id: "DONE", title: "Done" },
-];
-
-const INITIAL_TASKS = [
-  {
-    id: "1",
-    title: "Research Project",
-    description: "Gather requirements and create initial documentation",
-    status: "TODO",
-  },
-  {
-    id: "2",
-    title: "Design System",
-    description: "Create component library and design tokens",
-    status: "TODO",
-  },
-  {
-    id: "3",
-    title: "API Integration",
-    description: "Implement REST API endpoints",
-    status: "IN_PROGRESS",
-  },
-  {
-    id: "4",
-    title: "Testing",
-    description: "Write unit tests for core functionality",
-    status: "DONE",
-  },
+  { id: "To-Do", title: "To Do" },
+  { id: "In Progress", title: "In Progress" },
+  { id: "Done", title: "Done" },
 ];
 
 function App() {
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
-  const handleDragEnd = (event) => {
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState([]);
+  const axe = useAxios();
+
+  const { data } = useQuery({
+    queryKey: ["tasksQuery"],
+    queryFn: async () => {
+      const result = await axe.get(`/tasks/${user.email}`);
+      setTasks(result.data);
+      return result.data;
+    },
+  });
+
+  const handleDragEnd = async (event) => {
     const { active, over } = event;
     if (!over) {
       return;
@@ -46,9 +34,26 @@ function App() {
     const taskId = active.id;
     const newStatus = over.id;
     const newTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, status: newStatus } : task
+      task._id === taskId ? { ...task, category: newStatus } : task
     );
     setTasks(newTasks);
+    const reCalculateOrder = (tasks) => {
+      return tasks.map((task, index) => ({ ...task, order: index }));
+    };
+
+    const categories = ["To-Do", "In Progress", "Done"];
+    const updatedTasksOrder = categories.reduce((acc, category) => {
+      const tasksInCategory = newTasks.filter(
+        (task) => task.category === category
+      );
+      return [...acc, ...reCalculateOrder(tasksInCategory)];
+    }, []);
+    try {
+      await axe.put("/tasks-reorder", { tasks: updatedTasksOrder });
+    } catch (error) {
+      console.error("Error updating task order:", error);
+      // Optionally revert the state update or notify the user about the failure
+    }
   };
   return (
     <div>
@@ -60,7 +65,7 @@ function App() {
               <Column
                 key={col.id}
                 column={col}
-                tasks={tasks.filter((task) => task.status === col.id)}
+                tasks={tasks.filter((task) => task.category === col.id)}
               />
             ))}
           </DndContext>

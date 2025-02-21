@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import app from "../firebase/firebase.config";
 import { useEffect, useState } from "react";
+import useAxios from "../hooks/useAxios";
 
 const auth = getAuth(app);
 
@@ -16,6 +17,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const googleProvider = new GoogleAuthProvider();
+  const axe = useAxios();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -36,9 +38,17 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const logInGoogle = () => {
+  const logInGoogle = async () => {
     setLoading(true);
-    return signInWithPopup(auth, googleProvider);
+    const res = await signInWithPopup(auth, googleProvider);
+    const newUser = {
+      email: res.user.email,
+      name: res.user.displayName,
+      image: res.user.photoURL,
+      createdAt: new Date().toISOString(),
+    };
+    const result = await axe.post("/users", newUser);
+    console.log(result);
   };
 
   const authInfo = {
