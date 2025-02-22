@@ -58,7 +58,7 @@ const TaskCard = ({ task, refetch }) => {
     <>
       <div
         style={style}
-        className="cursor-grab flex rounded-lg bg-neutral-700 p-4 shadow-sm hover:shadow-md"
+        className="cursor-grab flex rounded-lg bg-neutral-700 p-4 touch-none shadow-sm hover:shadow-md"
       >
         <div ref={setNodeRef} {...listeners} {...attributes} className="grow">
           <h3 className="font-medium text-neutral-100">{task.title}</h3>

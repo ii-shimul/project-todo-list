@@ -6,7 +6,6 @@ import Banner from "./components/Banner";
 function App() {
   const { user } = useAuth();
 
-
   return (
     <>
       <Navbar />

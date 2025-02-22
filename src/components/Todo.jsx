@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { DndContext } from "@dnd-kit/core";
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { useQuery } from "@tanstack/react-query";
 import { ClockLoader } from "react-spinners";
 import { Button, DatePicker, Input, Modal, Select } from "antd";
@@ -27,6 +33,10 @@ const Todo = () => {
     category: "",
     dueDate: "",
   });
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor),
+  );
 
   // eslint-disable-next-line no-unused-vars
   const { data, isLoading, refetch } = useQuery({
@@ -106,11 +116,13 @@ const Todo = () => {
     setOpen(false);
   };
 
+  
+
   return (
     <>
       <div className="relative p-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          <DndContext onDragEnd={handleDragEnd}>
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
             {COLUMNS.map((col) => (
               <Column
                 key={col.id}
