@@ -5,7 +5,6 @@ import { DndContext } from "@dnd-kit/core";
 import useAxios from "./hooks/useAxios";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "./hooks/useAuth";
-import { ClockLoader } from "react-spinners";
 
 const COLUMNS = [
   { id: "To-Do", title: "To Do" },
@@ -18,8 +17,8 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const axe = useAxios();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["tasksQuery", user],
+  const { data } = useQuery({
+    queryKey: ["tasksQuery"],
     queryFn: async () => {
       const result = await axe.get(`/tasks/${user.email}`);
       setTasks(result.data);
@@ -27,17 +26,8 @@ function App() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <ClockLoader size={60}/>
-      </div>
-    );
-  }
-
   const handleDragEnd = async (event) => {
     const { active, over } = event;
-    console.log(over);
     if (!over) {
       return;
     }
