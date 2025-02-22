@@ -1,30 +1,5 @@
-import PropTypes from "prop-types";
 import useAuth from "../hooks/useAuth";
 
-const routes = [
-  { name: "Home", href: "#", isActive: true },
-];
-
-const NavMenu = ({ routes }) => (
-  <ul className="flex justify-center items-center h-full">
-    {routes.map((route, i) => (
-      <li key={i}>
-        <a
-          className={`px-4 ${
-            route.isActive ? "opacity-100" : "opacity-50 hover:opacity-100"
-          }`}
-          href={route.href}
-        >
-          {route.name}
-        </a>
-      </li>
-    ))}
-  </ul>
-);
-
-NavMenu.propTypes = {
-  routes: PropTypes.array.isRequired,
-};
 
 const Navbar = () => {
   const { logInGoogle, user, logOut } = useAuth();
@@ -36,14 +11,16 @@ const Navbar = () => {
             <a className="font-black text-3xl" href="#!">
               TaskFlow
             </a>
-            <NavMenu routes={routes} />
             {user?.email ? (
+              <div className="flex justify-center items-center gap-2">
+              <img src={user.photoURL} alt="" className="h-10 rounded-full" />
               <button
                 onClick={() => logOut()}
                 className="border border-black hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black rounded-lg px-4 py-1.5"
               >
                 Logout
               </button>
+              </div>
             ) : (
               <button
                 onClick={logInGoogle}
