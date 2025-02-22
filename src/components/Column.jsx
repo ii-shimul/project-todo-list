@@ -26,6 +26,7 @@ Column.propTypes = {
       _id: PropTypes.string.isRequired,
     })
   ).isRequired,
+  refetch: PropTypes.func.isRequired,
 };
 
 export default Column;

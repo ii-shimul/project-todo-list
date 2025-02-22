@@ -3,11 +3,10 @@ import useAuth from "../hooks/useAuth";
 
 const routes = [
   { name: "Home", href: "#", isActive: true },
-  { name: "My List", href: "#", isActive: false },
 ];
 
 const NavMenu = ({ routes }) => (
-  <ul className="flex justify-center items-center">
+  <ul className="flex justify-center items-center h-full">
     {routes.map((route, i) => (
       <li key={i}>
         <a

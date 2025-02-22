@@ -6,6 +6,9 @@ import useAxios from "./hooks/useAxios";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "./hooks/useAuth";
 import { ClockLoader } from "react-spinners";
+import { Button, DatePicker, Input, Modal, Select } from "antd";
+import "antd/dist/reset.css";
+import toast from "react-hot-toast";
 
 const COLUMNS = [
   { id: "To-Do", title: "To Do" },
@@ -17,6 +20,14 @@ function App() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const axe = useAxios();
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    dueDate: "",
+  });
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["tasksQuery"],
@@ -29,7 +40,7 @@ function App() {
   if (isLoading) {
     return (
       <div className="w-screen h-screen flex justify-center items-center">
-        <ClockLoader size={60}/>
+        <ClockLoader size={60} />
       </div>
     );
   }
@@ -62,10 +73,35 @@ function App() {
       // Optionally revert the state update or notify the user about the failure
     }
   };
+  const handleOk = async () => {
+    setConfirmLoading(true);
+    const newTask = {
+      email: user.email,
+      title: form.title,
+      description: form.description,
+      timestamp: new Date().toISOString(),
+      category: form.category,
+      order: 100000,
+      dueDate: form.dueDate,
+    };
+    const result = await axe.post("/tasks", newTask);
+    if (result.data.insertedId) {
+      toast.success("Added");
+      refetch();
+    } else {
+      toast.error("Something bad happened!");
+    }
+    setConfirmLoading(false);
+    setOpen(false);
+  };
+  const handleCancel = () => {
+    console.log("Clicked cancel button");
+    setOpen(false);
+  };
   return (
-    <div>
+    <div className="h-screen">
       <Navbar />
-      <div className="p-4 max-w-7xl mx-auto">
+      <div className="relative p-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-3 gap-3.5">
           <DndContext onDragEnd={handleDragEnd}>
             {COLUMNS.map((col) => (
@@ -78,7 +114,65 @@ function App() {
             ))}
           </DndContext>
         </div>
+        <div className="absolute right-4 -bottom-10">
+          <Button
+            onClick={() => {
+              setOpen(true);
+            }}
+            type="primary"
+            size="large"
+          >
+            Add Task
+          </Button>
+        </div>
       </div>
+      <Modal
+        title="Add Task"
+        open={open}
+        onOk={handleOk}
+        confirmLoading={confirmLoading}
+        onCancel={handleCancel}
+        okText="Add"
+      >
+        <div className="flex flex-col gap-2">
+          <Input
+            onChange={(e) => {
+              setForm((prev) => ({ ...prev, title: e.target.value }));
+            }}
+            placeholder="Title (max 50 characters)"
+            variant="filled"
+          />
+          <Input
+            onChange={(e) => {
+              setForm((prev) => ({ ...prev, description: e.target.value }));
+            }}
+            placeholder="Description (max 200 characters)"
+            variant="filled"
+          />
+          <span className="flex gap-2">
+            <Select
+              style={{ width: 120 }}
+              allowClear
+              options={[
+                { value: "To-Do", label: "To-Do" },
+                { value: "In Progress", label: "In Progress" },
+                { value: "Done", label: "Done" },
+              ]}
+              placeholder="Category"
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, category: e }));
+              }}
+            />
+            <DatePicker
+            className="grow"
+              placeholder="Select due date"
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, dueDate: e.$d.toISOString() }));
+              }}
+            />
+          </span>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { Modal, Select } from "antd";
 import { useState } from "react";
 import { Input } from "antd";
-import useAuth from "../hooks/useAuth";
 
 const TaskCard = ({ task, refetch }) => {
   const [open, setOpen] = useState(false);
