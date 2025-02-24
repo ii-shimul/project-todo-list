@@ -1,6 +1,8 @@
 import { useState } from "react";
 import {
+  closestCorners,
   DndContext,
+  DragOverlay,
   PointerSensor,
   TouchSensor,
   useSensor,
@@ -13,7 +15,9 @@ import "antd/dist/reset.css";
 import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth";
 import useAxios from "../hooks/useAxios";
-import Column from "./Column";
+import Column from "../components/Column";
+import { arrayMove } from "@dnd-kit/sortable";
+import TaskCard from "./TaskCard";
 
 const COLUMNS = [
   { id: "To-Do", title: "To Do" },
@@ -26,6 +30,7 @@ const Todo = () => {
   const [tasks, setTasks] = useState([]);
   const axe = useAxios();
   const [open, setOpen] = useState(false);
+  const [activeTask, setActiveTask] = useState({});
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -33,10 +38,7 @@ const Todo = () => {
     category: "",
     dueDate: "",
   });
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor),
-  );
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   // eslint-disable-next-line no-unused-vars
   const { data, isLoading, refetch } = useQuery({
@@ -55,14 +57,42 @@ const Todo = () => {
     );
   }
 
-  // function to handle when dragging ends
+  // functions to handle dnd
+  const getTaskPosition = (id) => tasks.findIndex((task) => task._id === id);
+
+  const handleDragStart = (event) => {
+    const activeId = event.active.id;
+    setActiveTask(tasks.find((task) => task._id === activeId));
+  };
+
   const handleDragEnd = async (event) => {
     const { active, over } = event;
+    const taskId = active.id;
+    console.log(active, over);
     if (!over) {
       return;
+    } else if (active.id === over.id) {
+      return;
     }
-    const taskId = active.id;
-    const newStatus = over.id;
+    const overTask = tasks.find((task) => task._id === over.id);
+    if (overTask?.category === activeTask.category) {
+      setTasks(() => {
+        const originalPosition = getTaskPosition(active.id);
+        const newPosition = getTaskPosition(over.id);
+        return arrayMove(tasks, originalPosition, newPosition);
+      });
+      return;
+    } else if (!overTask) {
+      setTasks(() => {
+        const newTasks = tasks.map((task) =>
+          task._id === taskId ? { ...task, category: over.id } : task
+        );
+        return newTasks;
+      });
+      return;
+    }
+
+    const newStatus = tasks.find((task) => task._id === over.id).category;
     const newTasks = tasks.map((task) =>
       task._id === taskId ? { ...task, category: newStatus } : task
     );
@@ -116,13 +146,16 @@ const Todo = () => {
     setOpen(false);
   };
 
-  
-
   return (
     <>
       <div className="relative p-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+          >
             {COLUMNS.map((col) => (
               <Column
                 key={col.id}
@@ -131,6 +164,9 @@ const Todo = () => {
                 tasks={tasks.filter((task) => task.category === col.id)}
               />
             ))}
+            <DragOverlay>
+              {activeTask ? <TaskCard task={activeTask} /> : null}
+            </DragOverlay>
           </DndContext>
         </div>
         <div className="absolute right-4 -bottom-10">

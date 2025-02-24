@@ -1,6 +1,10 @@
 import PropTypes from "prop-types";
 import TaskCard from "./TaskCard";
 import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 const Column = ({ column, tasks, refetch }) => {
   const { setNodeRef } = useDroppable({ id: column.id });
@@ -8,9 +12,14 @@ const Column = ({ column, tasks, refetch }) => {
     <div className="flex w-full max-md:min-h-32 flex-col rounded-lg bg-neutral-800 p-4">
       <h2 className="mb-4 font-semibold text-neutral-100">{column.title}</h2>
       <div ref={setNodeRef} className="flex flex-1 flex-col gap-4">
-        {tasks.map((task) => {
-          return <TaskCard refetch={refetch} key={task._id} task={task} />;
-        })}
+        <SortableContext
+          items={tasks.map((task) => task._id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {tasks.map((task) => {
+            return <TaskCard refetch={refetch} key={task._id} task={task} />;
+          })}
+        </SortableContext>
       </div>
     </div>
   );

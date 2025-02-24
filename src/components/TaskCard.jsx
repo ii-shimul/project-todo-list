@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 import { Modal, Select } from "antd";
 import { useState } from "react";
 import { Input } from "antd";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const TaskCard = ({ task, refetch }) => {
   const [open, setOpen] = useState(false);
@@ -17,12 +19,14 @@ const TaskCard = ({ task, refetch }) => {
     category: "",
   });
   const axe = useAxios();
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: task._id,
-  });
-  const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
-    : undefined;
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: task._id,
+    });
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
 
   const handleDelete = async () => {
     const result = await axe.delete(`/tasks/${task._id}`);
@@ -43,9 +47,9 @@ const TaskCard = ({ task, refetch }) => {
     const result = await axe.put(`/tasks/${task._id}`, updatedTask);
     if (result.data.modifiedCount > 0) {
       toast.success("Updated");
-      refetch()
+      refetch();
     } else {
-      toast.error("Something bad happened!")
+      toast.error("Something bad happened!");
     }
     setConfirmLoading(false);
     setOpen(false);
@@ -128,9 +132,10 @@ TaskCard.propTypes = {
   task: PropTypes.shape({
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    _id: PropTypes.number.isRequired,
+    _id: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
   }).isRequired,
-  refetch: PropTypes.func.isRequired,
+  refetch: PropTypes.func,
 };
 
 export default TaskCard;
