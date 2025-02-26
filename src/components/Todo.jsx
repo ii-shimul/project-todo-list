@@ -57,9 +57,6 @@ const Todo = () => {
     );
   }
 
-  // functions to handle dnd
-  const getTaskPosition = (id) => tasks.findIndex((task) => task._id === id);
-
   const handleDragStart = (event) => {
     const activeId = event.active.id;
     setActiveTask(tasks.find((task) => task._id === activeId));
@@ -67,52 +64,50 @@ const Todo = () => {
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
-    const taskId = active.id;
-    console.log(active, over);
-    if (!over) {
-      return;
-    } else if (active.id === over.id) {
-      return;
-    }
-    const overTask = tasks.find((task) => task._id === over.id);
-    if (overTask?.category === activeTask.category) {
-      setTasks(() => {
-        const originalPosition = getTaskPosition(active.id);
-        const newPosition = getTaskPosition(over.id);
-        return arrayMove(tasks, originalPosition, newPosition);
-      });
-      return;
-    } else if (!overTask) {
-      setTasks(() => {
-        const newTasks = tasks.map((task) =>
-          task._id === taskId ? { ...task, category: over.id } : task
-        );
-        return newTasks;
-      });
-      return;
-    }
+    if (!over) return;
 
-    const newStatus = tasks.find((task) => task._id === over.id).category;
-    const newTasks = tasks.map((task) =>
-      task._id === taskId ? { ...task, category: newStatus } : task
-    );
-    setTasks(newTasks);
-    const reCalculateOrder = (tasks) => {
-      return tasks.map((task, index) => ({ ...task, order: index }));
-    };
+    const overTask = tasks.find((task) => task._id === over.id);
+
+    if (!activeTask) return;
 
     const categories = ["To-Do", "In Progress", "Done"];
-    const updatedTasksOrder = categories.reduce((acc, category) => {
-      const tasksInCategory = newTasks.filter(
+
+    let updatedTasks = [...tasks];
+
+    if (overTask?.category === activeTask.category) {
+      const getTaskPosition = (id) =>
+        tasks.findIndex((task) => task._id === id);
+      const originalPosition = getTaskPosition(activeTask._id);
+      const newPosition = getTaskPosition(overTask._id);
+      updatedTasks = arrayMove(tasks, originalPosition, newPosition);
+    }
+    else if (categories.includes(over.id)) {
+      updatedTasks = tasks.map((task) =>
+        task._id === active.id ? { ...task, category: over.id } : task
+      );
+    }
+    else {
+      updatedTasks = tasks.map((task) =>
+        task._id === active.id ? { ...task, category: overTask.category } : task
+      );
+    }
+
+    const reCalculateOrder = (tasks) =>
+      tasks.map((task, index) => ({ ...task, order: index }));
+
+    const reorderedTasks = categories.reduce((acc, category) => {
+      const tasksInCategory = updatedTasks.filter(
         (task) => task.category === category
       );
       return [...acc, ...reCalculateOrder(tasksInCategory)];
     }, []);
+
+    setTasks(reorderedTasks);
+
     try {
-      await axe.put("/tasks-reorder", { tasks: updatedTasksOrder });
+      await axe.put("/tasks-reorder", { tasks: reorderedTasks });
     } catch (error) {
       console.error("Error updating task order:", error);
-      // Optionally revert the state update or notify the user about the failure
     }
   };
 
