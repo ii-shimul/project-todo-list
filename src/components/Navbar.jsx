@@ -1,5 +1,5 @@
+import { Tooltip } from "antd";
 import useAuth from "../hooks/useAuth";
-
 
 const Navbar = () => {
   const { logInGoogle, user, logOut } = useAuth();
@@ -13,13 +13,19 @@ const Navbar = () => {
             </a>
             {user?.email ? (
               <div className="flex justify-center items-center gap-2">
-              <img src={user.photoURL} alt="" className="h-10 rounded-full" />
-              <button
-                onClick={() => logOut()}
-                className="border border-black hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black rounded-lg px-4 py-1.5"
-              >
-                Logout
-              </button>
+                <Tooltip title={user.displayName} placement="bottom">
+                  <img
+                    src={user.photoURL}
+                    alt=""
+                    className="h-10 rounded-full cursor-pointer"
+                  />
+                </Tooltip>
+                <button
+                  onClick={() => logOut()}
+                  className="border border-black hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black rounded-lg px-4 py-1.5"
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               <button

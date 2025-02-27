@@ -8,8 +8,10 @@ function App() {
 
   return (
     <>
-      <Navbar />
-      {user?.email ? <Todo /> : <Banner />}
+      <div className="bg-neutral-200 w-screen min-h-screen">
+        <Navbar />
+        {user?.email ? <Todo /> : <Banner />}
+      </div>
     </>
   );
 }

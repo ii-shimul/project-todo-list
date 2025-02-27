@@ -1,4 +1,3 @@
-import { useDraggable } from "@dnd-kit/core";
 import PropTypes from "prop-types";
 import { FaRegEdit } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
@@ -62,27 +61,30 @@ const TaskCard = ({ task, refetch }) => {
     <>
       <div
         style={style}
-        className="cursor-grab flex rounded-lg bg-neutral-700 p-4 touch-none shadow-sm hover:shadow-md"
+        className="cursor-grab flex rounded-lg bg-neutral-100 p-4 touch-none shadow-sm hover:shadow-md"
       >
         <div ref={setNodeRef} {...listeners} {...attributes} className="grow">
-          <h3 className="font-medium text-neutral-100">{task.title}</h3>
-          <p className="mt-2 text-sm text-neutral-400">{task.description}</p>
+          <h3 className="font-medium text-neutral-700">{task.title}</h3>
+          <p className="mt-2 text-sm text-neutral-500">{task.description}</p>
+          <p className="text-xs text-neutral-400">
+            {new Date(task.timestamp).toLocaleString()}
+          </p>
         </div>
-        <div className="flex flex-col gap-2 text-xl text-white w-fit h-fit">
+        <div className="flex flex-col gap-2 text-xl w-fit h-fit">
           <span
             onClick={(e) => {
               e.stopPropagation();
               handleDelete();
             }}
           >
-            <MdDeleteOutline className="cursor-pointer p-0.5" />
+            <MdDeleteOutline className="cursor-pointer p-0.5 text-gray-700 hover:text-gray-400 hover:scale-115" />
           </span>
           <span
             onClick={() => {
               setOpen(true);
             }}
           >
-            <FaRegEdit className="cursor-pointer p-0.5" />
+            <FaRegEdit className="cursor-pointer p-0.5 text-gray-700 hover:text-gray-400 hover:scale-115" />
           </span>
         </div>
       </div>
@@ -134,6 +136,7 @@ TaskCard.propTypes = {
     description: PropTypes.string.isRequired,
     _id: PropTypes.string.isRequired,
     category: PropTypes.string.isRequired,
+    timestamp: PropTypes.string.isRequired,
   }).isRequired,
   refetch: PropTypes.func,
 };

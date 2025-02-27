@@ -143,7 +143,7 @@ const Todo = () => {
 
   return (
     <>
-      <div className="relative p-4 max-w-7xl mx-auto">
+      <div className="relative p-4 max-w-7xl mx-auto ">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           <DndContext
             sensors={sensors}
@@ -169,8 +169,9 @@ const Todo = () => {
             onClick={() => {
               setOpen(true);
             }}
-            type="primary"
+            type="dashed"
             size="large"
+            color="black"
           >
             Add Task
           </Button>
